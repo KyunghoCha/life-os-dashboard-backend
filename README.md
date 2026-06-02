@@ -27,19 +27,31 @@ npm install
 npm run dev
 ```
 
-기본 서버 주소는 `http://127.0.0.1:4000`이다. 환경 변수 예시는 `.env.example`에 있다.
+기본 서버 주소는 `http://127.0.0.1:4000`이다. Node 기준은 `.nvmrc`와 `package.json`의 `engines`에 맞춘 Node 24다. 환경 변수 예시는 `.env.example`에 있다.
 
 ## 데이터 관리
 
 ```bash
 npm run backup
+npm run restore -- <backup-file> --force
 npm run reset -- --force
 npm run smoke
 ```
 
 - `npm run backup`은 현재 SQLite DB를 `backups/` 아래에 복사한다.
+- `npm run restore -- <backup-file> --force`는 백업 파일을 `DB_PATH` 위치로 복원한다.
 - `npm run reset -- --force`는 `DB_PATH`의 SQLite 파일과 WAL/SHM 파일을 삭제한다.
 - `npm run smoke`는 API 주요 흐름과 CORS 응답을 임시 DB로 검증한다.
+
+## CI
+
+GitHub Actions는 `ubuntu-latest`, `windows-latest`, `macos-latest`에서 다음을 실행한다.
+
+```bash
+npm ci
+npm run smoke
+npm audit --audit-level=moderate
+```
 
 ## 구현 전 원칙
 

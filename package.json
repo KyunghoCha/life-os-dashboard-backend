@@ -9,8 +9,12 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js",
     "reset": "node scripts/reset.js",
     "smoke": "node scripts/smoke.js"
+  },
+  "engines": {
+    "node": ">=24 <25"
   },
   "dependencies": {
     "better-sqlite3": "^12.10.0",

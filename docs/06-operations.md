@@ -29,6 +29,11 @@ npm install
 npm run dev
 ```
 
+Node 기준:
+
+- `.nvmrc`: `24`
+- `package.json` engines: `>=24 <25`
+
 기본 주소:
 
 - API 서버: `http://127.0.0.1:4000`
@@ -84,6 +89,38 @@ npm run reset -- --force
 - 사용자 데이터가 들어간 DB라면 먼저 `npm run backup`을 실행한다.
 - `--force`가 없으면 초기화는 실행되지 않는다.
 
+## 복원
+
+```bash
+npm run restore -- <backup-file> --force
+```
+
+복원 스크립트는 백업 파일을 `DB_PATH` 위치로 복사한다. 기존 DB가 있으면 `backups/pre-restore/` 아래에 현재 DB 파일을 한 번 복사한 뒤 복원을 진행한다.
+
+주의:
+
+- 서버가 실행 중이면 먼저 종료한다.
+- 복원 전에 직접 `npm run backup`을 한 번 더 실행하는 편이 안전하다.
+- `--force`가 없으면 복원은 실행되지 않는다.
+
+## CI
+
+GitHub Actions workflow는 `.github/workflows/ci.yml`에 있다. 현재 matrix는 다음 OS를 사용한다.
+
+- `ubuntu-latest`
+- `windows-latest`
+- `macos-latest`
+
+각 OS에서 실행하는 검증:
+
+```bash
+npm ci
+npm run smoke
+npm audit --audit-level=moderate
+```
+
+이 CI는 `better-sqlite3` 설치와 smoke 흐름이 Windows, Linux, macOS에서 동작하는지 확인하기 위한 최소 크로스 플랫폼 검증이다.
+
 ## 남은 백엔드 판단
 
 현재 구현은 `better-sqlite3`를 사용한다. 이 선택은 Node 내장 `node:sqlite`의 release-candidate 경고를 피하고, 성숙한 SQLite driver 위에서 로컬 저장소를 운영하기 위한 것이다.
@@ -93,6 +130,6 @@ npm run reset -- --force
 - Windows, macOS, Linux에서 사용할 수 있지만 native addon이므로 설치 시 플랫폼/아키텍처에 맞는 binary가 필요하다.
 - prebuilt binary가 맞지 않는 환경에서는 C/C++ 빌드 도구가 필요할 수 있다.
 - 현재 Windows 환경에서는 `npm install better-sqlite3`, `npm run smoke`, `npm run backup`이 통과했다.
-- macOS/Linux 실행이 필요해지면 GitHub Actions 또는 실제 장비에서 `npm ci`와 `npm run smoke`를 돌려 확인한다.
+- macOS/Linux 실행은 GitHub Actions CI와 실제 장비에서 `npm ci`와 `npm run smoke`를 돌려 확인한다.
 
 스키마는 현재 `schema_migrations` 테이블에 version `1`을 기록한다. 이후 컬럼 추가나 데이터 변환이 필요해지면 새 migration 파일 또는 migration runner를 추가한다.

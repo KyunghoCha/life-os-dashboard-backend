@@ -10,6 +10,7 @@
 - [구현 계획](docs/04-implementation-plan.md)
 - [실사용 최종 로드맵](docs/05-final-roadmap.md)
 - [운영 명령과 데이터 관리](docs/06-operations.md)
+- [프론트 연동 안내](docs/07-frontend-integration.md)
 
 ## 현재 기준
 
@@ -18,7 +19,7 @@
 - 실행 형태: 브라우저에서 동작하는 React/Vite 웹앱
 - 백엔드 현재 상태: Express API와 `better-sqlite3` 기반 SQLite 저장소가 있으며 `npm run smoke`로 기본 API 흐름을 확인한다.
 - 프론트 현재 상태: `GET /api/dashboard`, 버그 추가/해결, AI 조언, Vault demo unlock/진행률 수정, Co-op sync API를 호출한다.
-- 다음 목표: 브라우저에서 실제 클릭 흐름과 새로고침 후 데이터 유지까지 확인하고, 루트 실행 방식을 정리한다.
+- 다음 목표: 실행 스크립트와 API 계약을 팀 공유용으로 더 단단하게 정리하고, 실제 AI/Vault 보안 범위를 결정한다.
 
 ## 실행
 
@@ -29,16 +30,24 @@ npm run dev
 
 기본 서버 주소는 `http://127.0.0.1:4000`이다. Node 기준은 `.nvmrc`와 `package.json`의 `engines`에 맞춘 Node 24다. 환경 변수 예시는 `.env.example`에 있다.
 
+서버가 이미 실행 중이면 다음 명령으로 연결 상태를 확인할 수 있다.
+
+```bash
+npm run health
+```
+
 ## 데이터 관리
 
 ```bash
 npm run backup
+npm run health
 npm run restore -- <backup-file> --force
 npm run reset -- --force
 npm run smoke
 ```
 
 - `npm run backup`은 현재 SQLite DB를 `backups/` 아래에 복사한다.
+- `npm run health`는 실행 중인 백엔드의 `/api/health` 응답을 확인한다.
 - `npm run restore -- <backup-file> --force`는 백업 파일을 `DB_PATH` 위치로 복원한다.
 - `npm run reset -- --force`는 `DB_PATH`의 SQLite 파일과 WAL/SHM 파일을 삭제한다.
 - `npm run smoke`는 API 주요 흐름과 CORS 응답을 임시 DB로 검증한다.

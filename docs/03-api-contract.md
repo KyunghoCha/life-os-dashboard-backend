@@ -7,6 +7,8 @@
 - 시간 형식: ISO 8601 문자열
 - 1차 구현 인증: 없음
 - 1차 사용자 범위: 단일 로컬 사용자
+- 프론트 초기 로드는 `GET /api/dashboard`를 우선 사용한다.
+- 프론트 연동 순서는 [프론트 연동 안내](07-frontend-integration.md)를 기준으로 한다.
 
 ## 공통 응답
 
@@ -360,3 +362,12 @@ Vault 항목의 진행률을 수정한다.
 3. `POST /api/bugs/:id/resolve` 후 `GET /api/profile`의 XP가 증가한다.
 4. `POST /api/ai/advice`는 프론트의 기존 AI 패널과 같은 주제별 응답을 반환한다.
 5. `POST /api/vault/unlock`은 실제 보안 여부를 `mode`로 구분한다.
+
+## 입력 검증 요약
+
+- `severity`: `critical`, `high`, `med`, `low`
+- `status`: `open`, `resolved`, `all`
+- `ownerType`: `self`, `partner`
+- `progress`: 0 이상 100 이하의 정수
+- `xpDelta`: 0 이상 5000 이하의 정수
+- 필수 문자열 필드는 공백만 있으면 `400 VALIDATION_ERROR`를 반환한다.

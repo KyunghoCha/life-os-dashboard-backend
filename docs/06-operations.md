@@ -42,7 +42,23 @@ Node 기준:
 ## 검증
 
 ```bash
+npm run health
 npm run smoke
+```
+
+`health`는 실행 중인 서버의 `/api/health` 응답을 확인한다. 서버가 켜져 있어야 하며, 기본 확인 주소는 `http://127.0.0.1:4000`이다.
+
+```powershell
+npm run dev
+# 다른 터미널에서
+npm run health
+```
+
+다른 주소를 확인하려면 `API_BASE_URL`을 지정한다.
+
+```powershell
+$env:API_BASE_URL = "http://127.0.0.1:4000"
+npm run health
 ```
 
 `smoke`는 임시 DB인 `data/smoke.sqlite`를 사용하고 종료 시 삭제한다. 현재 확인 범위는 다음과 같다.

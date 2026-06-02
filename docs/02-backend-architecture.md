@@ -6,15 +6,92 @@
 
 ## 권장 기술 스택
 
-현재 프론트가 Node.js 기반 도구인 Vite를 사용하므로, 1차 백엔드는 Node.js 런타임 위에서 구현하는 편이 작업 비용이 낮다. 권장 기본값은 다음과 같다.
+현재 프론트가 Node.js 기반 도구인 Vite를 사용하므로, 1차 백엔드는 Node.js 런타임 위에서 구현하는 편이 작업 비용이 낮다. 현재 구현 기준은 다음과 같다.
 
-- 런타임: Node.js
-- HTTP 서버: Express
-- 로컬 저장소: SQLite
-- API 형식: JSON REST API
-- 실행 위치: `C:\Projects\life-os-dashboard\backend`
+| 구분 | 현재 선택 | 역할 |
+| --- | --- | --- |
+| 런타임 | Node.js 24 | 백엔드 서버와 운영 스크립트 실행 |
+| HTTP 서버 | Express | `/api/*` JSON REST API 제공 |
+| DB 드라이버 | `better-sqlite3` | Node.js에서 SQLite 파일을 직접 읽고 쓰는 native addon |
+| 저장소 | SQLite | 단일 로컬 사용자 데이터를 `data/life-os.sqlite`에 저장 |
+| API 형식 | JSON REST API | 프론트 React/Vite 앱과 HTTP로 통신 |
+| 검증 | `npm run smoke`, `npm run health` | 주요 API 흐름과 실행 상태 확인 |
+| 운영 스크립트 | `backup`, `restore`, `reset` | 로컬 DB 백업, 복원, 초기화 |
+| CI | GitHub Actions | Windows, Ubuntu, macOS에서 smoke와 audit 실행 |
 
-이 선택은 현재 프로젝트 상황에 맞춘 권장안이다. 아직 구현으로 검증된 결정은 아니다.
+이 선택은 로컬 단일 사용자 앱을 빠르게 실사용 가능한 형태로 만들기 위한 1차 결정이다. 인증, 실제 AI 연동, 실제 Vault 암호화, 데스크톱 패키징은 현재 필수 범위가 아니다.
+
+## 전체 구성도
+
+```mermaid
+flowchart LR
+  User["사용자 브라우저"] --> Frontend["React/Vite Frontend<br/>localhost:5173"]
+  Frontend -->|"HTTP JSON /api/*"| Backend["Express API<br/>Node.js 24"]
+  Backend --> Routes["routes<br/>HTTP 경로"]
+  Routes --> Services["services<br/>앱 규칙"]
+  Services --> Repositories["repositories<br/>DB 접근"]
+  Repositories --> SQLite[("SQLite<br/>data/life-os.sqlite")]
+
+  Scripts["운영 스크립트<br/>backup / restore / reset / smoke / health"] --> Backend
+  Scripts --> SQLite
+  CI["GitHub Actions<br/>Windows / Ubuntu / macOS"] --> Smoke["npm ci<br/>npm run smoke<br/>npm audit"]
+  Smoke --> Backend
+```
+
+## 요청 처리 흐름
+
+```mermaid
+sequenceDiagram
+  participant FE as Frontend
+  participant R as Express Route
+  participant S as Service
+  participant Q as Repository
+  participant DB as SQLite
+
+  FE->>R: HTTP request: POST /api/bugs
+  R->>S: 요청 body/query 전달
+  S->>S: 입력 검증과 앱 규칙 처리
+  S->>Q: 필요한 DB 작업 요청
+  Q->>DB: SQL 실행
+  DB-->>Q: row 또는 변경 결과
+  Q-->>S: JS 객체로 변환
+  S-->>R: 도메인 결과 반환
+  R-->>FE: JSON { data: ... }
+```
+
+## 주요 데이터 흐름
+
+```mermaid
+flowchart TD
+  A["프론트 초기 진입"] --> B["GET /api/dashboard"]
+  B --> C["dashboardService.readDashboard"]
+  C --> D["profileRepository.getProfile"]
+  C --> E["bugRepository.listBugs(status=open)"]
+  C --> F["goalRepository.listGoals"]
+  C --> G["coopRepository.getPartner"]
+  C --> H["vaultRepository.listVaultItems"]
+  D --> I[("SQLite")]
+  E --> I
+  F --> I
+  G --> I
+  H --> I
+  I --> J["profile / bugs / goals / partner / vaultItems"]
+  J --> K["프론트 화면 상태 구성"]
+```
+
+```mermaid
+flowchart TD
+  A["사용자가 bug PATCH 클릭"] --> B["POST /api/bugs/:id/resolve"]
+  B --> C["bugService.resolveBugAndAwardXp"]
+  C --> D["bug status = resolved"]
+  C --> E["profile xp 증가"]
+  C --> F["xp_events 기록"]
+  D --> G[("SQLite transaction")]
+  E --> G
+  F --> G
+  G --> H["{ bug, profile, xpEvent }"]
+  H --> I["프론트에서 bug 제거<br/>XP bar 갱신"]
+```
 
 ## 디렉터리 구조 초안
 

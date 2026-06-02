@@ -5,7 +5,7 @@
 ## 문서
 
 - [제품 범위와 요구사항](docs/01-product-scope.md)
-- [백엔드 구조 설계](docs/02-backend-architecture.md)
+- [백엔드 구조 설계와 기술 스택/흐름도](docs/02-backend-architecture.md)
 - [API 계약 초안](docs/03-api-contract.md)
 - [구현 계획](docs/04-implementation-plan.md)
 - [실사용 최종 로드맵](docs/05-final-roadmap.md)

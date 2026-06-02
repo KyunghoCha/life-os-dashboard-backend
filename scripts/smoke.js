@@ -87,6 +87,17 @@ try {
     throw new Error("XP event for resolved bug missing");
   }
 
+  const manualXp = await request("/api/xp/events", {
+    method: "POST",
+    body: JSON.stringify({ delta: 30, reason: "manual smoke adjustment", sourceId: "smoke" }),
+  });
+  if (manualXp.profile.xp !== resolved.profile.xp + 30) {
+    throw new Error("manual XP did not persist");
+  }
+  if (manualXp.event.delta !== 30 || manualXp.event.sourceType !== "manual") {
+    throw new Error("manual XP event response mismatch");
+  }
+
   const goal = await request("/api/goals", {
     method: "POST",
     body: JSON.stringify({ ownerType: "self", label: "smoke test goal", progress: 10 }),
@@ -123,7 +134,7 @@ try {
   }
 
   const dashboardAfterWrites = await request("/api/dashboard");
-  if (dashboardAfterWrites.profile.xp !== resolved.profile.xp) {
+  if (dashboardAfterWrites.profile.xp !== manualXp.profile.xp) {
     throw new Error("dashboard did not reflect persisted XP");
   }
   if (!dashboardAfterWrites.goals.self.some((item) => item.id === goal.id && item.progress === 35)) {

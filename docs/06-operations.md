@@ -114,7 +114,7 @@ $env:DB_PATH = "data/local-test.sqlite"
 npm run backup
 ```
 
-백업 스크립트는 복사 전에 WAL checkpoint를 실행한다. 이 작업은 로컬 DB 파일을 단일 SQLite 파일로 보존하기 위한 절차다.
+백업 스크립트는 `better-sqlite3`의 `db.backup()`을 사용해 현재 SQLite DB를 백업 파일로 저장한다. 별도 WAL checkpoint 명령을 직접 실행하지는 않는다.
 
 ## 초기화
 

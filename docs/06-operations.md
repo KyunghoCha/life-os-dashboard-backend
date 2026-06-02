@@ -86,9 +86,13 @@ npm run reset -- --force
 
 ## 남은 백엔드 판단
 
-현재 구현은 Node 내장 `node:sqlite`를 사용한다. 로컬 smoke 실행에서 Node가 experimental warning을 출력하므로, 장기 실사용 전에 다음 중 하나를 결정해야 한다.
+현재 구현은 `better-sqlite3`를 사용한다. 이 선택은 Node 내장 `node:sqlite`의 release-candidate 경고를 피하고, 성숙한 SQLite driver 위에서 로컬 저장소를 운영하기 위한 것이다.
 
-- Node 버전을 고정하고 현재 구현을 유지한다.
-- 더 안정적인 SQLite 드라이버로 교체한다.
+크로스 플랫폼 주의사항:
+
+- Windows, macOS, Linux에서 사용할 수 있지만 native addon이므로 설치 시 플랫폼/아키텍처에 맞는 binary가 필요하다.
+- prebuilt binary가 맞지 않는 환경에서는 C/C++ 빌드 도구가 필요할 수 있다.
+- 현재 Windows 환경에서는 `npm install better-sqlite3`, `npm run smoke`, `npm run backup`이 통과했다.
+- macOS/Linux 실행이 필요해지면 GitHub Actions 또는 실제 장비에서 `npm ci`와 `npm run smoke`를 돌려 확인한다.
 
 스키마는 현재 `schema_migrations` 테이블에 version `1`을 기록한다. 이후 컬럼 추가나 데이터 변환이 필요해지면 새 migration 파일 또는 migration runner를 추가한다.

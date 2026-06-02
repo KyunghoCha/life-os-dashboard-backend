@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
 const dbPath = resolve(process.env.DB_PATH || "data/life-os.sqlite");
@@ -14,12 +14,10 @@ if (!existsSync(dbPath)) {
 const { db, closeDatabase } = await import("../src/db/connection.js");
 
 try {
-  db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
+  mkdirSync(dirname(backupPath), { recursive: true });
+  await db.backup(backupPath);
 } finally {
   closeDatabase();
 }
-
-mkdirSync(dirname(backupPath), { recursive: true });
-copyFileSync(dbPath, backupPath);
 
 console.log(`backup created: ${backupPath}`);

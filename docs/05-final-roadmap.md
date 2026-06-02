@@ -13,9 +13,9 @@
 - `frontend/.env.example`은 `VITE_API_BASE_URL=http://localhost:4000` 예시를 제공한다.
 - `backend/src/app.js`는 `/api` 아래에 라우터를 mount한다.
 - `backend/src/routes/index.js`는 health, dashboard, profile, xp, bugs, goals, ai, vault, coop 라우터를 모은다.
-- `backend/src/db/connection.js`는 Node 내장 `node:sqlite`의 `DatabaseSync`를 사용한다.
+- `backend/src/db/connection.js`는 `better-sqlite3`를 사용한다.
 - `npm run smoke`는 health, dashboard, bug 생성/해결, XP 증가, AI 조언, Vault demo unlock 흐름을 통과했다.
-- 같은 smoke 실행에서 현재 로컬 Node 런타임은 `SQLite is an experimental feature and might change at any time` 경고를 출력했다.
+- `better-sqlite3` 전환 후 현재 Windows 환경에서 `npm install`, `npm run smoke`, `npm run backup`이 통과했다.
 - `npm run build`는 프론트 번들을 생성하는 데 성공했다.
 - `http://127.0.0.1:5173/` preview 서버는 HTTP 200으로 응답했다.
 - `npm run backup`과 `npm run reset -- --force`는 임시 DB 경로로 동작을 확인했다.
@@ -24,6 +24,7 @@
 ### 외부 공식 근거
 
 - [Node.js `node:sqlite` 문서](https://nodejs.org/download/release/latest-v24.x/docs/api/sqlite.html)는 `node:sqlite`의 안정성 상태를 release candidate로 표시한다.
+- [better-sqlite3 문서](https://github.com/WiseLibs/better-sqlite3)는 synchronous API, transaction, WAL, backup, supported Node version과 LTS prebuilt binary 조건을 설명한다.
 - [SQLite serverless 문서](https://www.sqlite.org/serverless.html)는 SQLite가 별도 서버 프로세스 없이 애플리케이션 프로세스가 디스크의 데이터베이스 파일을 직접 읽고 쓴다고 설명한다.
 - [SQLite transactional 문서](https://www.sqlite.org/transactional.html)는 SQLite 트랜잭션의 ACID 성격과 단일 트랜잭션의 all-or-nothing 동작을 설명한다.
 - [Express routing 문서](https://expressjs.com/en/guide/routing/)는 `express.Router`를 modular, mountable route handler로 설명한다.
@@ -80,10 +81,9 @@ Verification method:
 
 SQLite 공식 문서는 SQLite를 별도 서버 프로세스가 없는 단일 파일 기반 내장 데이터베이스로 설명한다. 이 성격은 로컬 단일 사용자 앱의 저장소 요구와 맞는다. 또한 SQLite 문서는 트랜잭션이 원자성, 일관성, 격리성, 지속성을 제공한다고 설명한다.
 
-현재 백엔드가 SQLite를 쓰는 방향은 로컬 앱 목적에는 맞다. 다만 Node.js의 `node:sqlite` 문서는 이 모듈이 현재 release candidate 상태라고 설명하고, 로컬 smoke 실행에서도 experimental warning이 출력된다. 따라서 실사용을 안정적으로 굳히려면 다음 중 하나를 결정해야 한다.
+현재 백엔드가 SQLite를 쓰는 방향은 로컬 앱 목적에는 맞다. Node.js의 `node:sqlite` 문서는 이 모듈이 현재 release candidate 상태라고 설명했고, 로컬 smoke 실행에서도 experimental warning이 출력되었다. 이 경고와 장기 유지 불확실성을 줄이기 위해 DB driver를 `better-sqlite3`로 전환했다.
 
-- 현재처럼 `node:sqlite`를 유지하고 Node 버전을 고정한다.
-- 더 성숙한 SQLite 드라이버로 바꾼다.
+전환 후에도 크로스 플랫폼 주의사항은 남는다. `better-sqlite3`는 native addon이므로 Windows, macOS, Linux에서 사용할 수 있지만, 플랫폼/아키텍처에 맞는 binary 또는 빌드 도구가 필요하다. 현재 검증은 Windows 로컬 환경에서 수행했다.
 
 ### Express API 구조
 
@@ -213,6 +213,6 @@ demo 기능과 실제 기능의 경계가 드러난다.
 
 ## 남은 불확실성
 
-- Node 내장 SQLite를 계속 쓸지, 안정성을 위해 다른 SQLite 드라이버로 바꿀지 결정이 필요하다.
+- macOS/Linux 환경에서 `better-sqlite3` 설치와 smoke 실행을 직접 확인해야 한다.
 - 최종 실행 방식을 웹앱 개발 서버 2개로 둘지, 데스크톱 앱처럼 포장할지 결정이 필요하다.
 - Vault를 실제 보안 기능으로 만들지, 개인 기록용 demo 잠금으로 둘지 결정이 필요하다.

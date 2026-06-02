@@ -16,7 +16,7 @@
 - 앱 이름: `life-os-dashboard`
 - 프론트 제목: `Life OS Dashboard`
 - 실행 형태: 브라우저에서 동작하는 React/Vite 웹앱
-- 백엔드 현재 상태: Express API와 SQLite 저장소가 있으며 `npm run smoke`로 기본 API 흐름을 확인한다.
+- 백엔드 현재 상태: Express API와 `better-sqlite3` 기반 SQLite 저장소가 있으며 `npm run smoke`로 기본 API 흐름을 확인한다.
 - 프론트 현재 상태: `GET /api/dashboard`, 버그 추가/해결, AI 조언, Vault demo unlock/진행률 수정, Co-op sync API를 호출한다.
 - 다음 목표: 브라우저에서 실제 클릭 흐름과 새로고침 후 데이터 유지까지 확인하고, 루트 실행 방식을 정리한다.
 

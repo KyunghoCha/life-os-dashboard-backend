@@ -1,24 +1,16 @@
-import { DatabaseSync } from "node:sqlite";
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import Database from "better-sqlite3";
 import { env } from "../config/env.js";
 
 const dbFile = resolve(env.dbPath);
 mkdirSync(dirname(dbFile), { recursive: true });
 
-export const db = new DatabaseSync(dbFile);
+export const db = new Database(dbFile);
 db.exec(readFileSync(new URL("./schema.sql", import.meta.url), "utf8"));
 
 export function transaction(work) {
-  db.exec("BEGIN");
-  try {
-    const result = work();
-    db.exec("COMMIT");
-    return result;
-  } catch (err) {
-    db.exec("ROLLBACK");
-    throw err;
-  }
+  return db.transaction(work)();
 }
 
 export function closeDatabase() {

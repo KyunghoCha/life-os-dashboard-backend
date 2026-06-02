@@ -19,8 +19,13 @@ try {
   const baseUrl = `http://127.0.0.1:${port}`;
 
   async function request(path, options = {}) {
+    const headers = {
+      "Content-Type": "application/json",
+      Origin: "http://127.0.0.1:5173",
+      ...(options.headers || {}),
+    };
     const response = await fetch(`${baseUrl}${path}`, {
-      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      headers,
       ...options,
     });
     const body = await response.json();
@@ -33,7 +38,14 @@ try {
   const health = await request("/api/health");
   if (health.status !== "ok") throw new Error("health status mismatch");
 
-  const dashboard = await request("/api/dashboard");
+  const dashboardResponse = await fetch(`${baseUrl}/api/dashboard`, {
+    headers: { Origin: "http://127.0.0.1:5173" },
+  });
+  if (dashboardResponse.headers.get("access-control-allow-origin") !== "http://127.0.0.1:5173") {
+    throw new Error("CORS origin mismatch");
+  }
+  const dashboardPayload = await dashboardResponse.json();
+  const dashboard = dashboardPayload.data;
   if (!dashboard.profile || dashboard.bugs.length === 0) {
     throw new Error("dashboard seed data missing");
   }
@@ -42,6 +54,20 @@ try {
     method: "POST",
     body: JSON.stringify({ text: "smoke test bug", severity: "low" }),
   });
+  if (!bug.id || bug.status !== "open") throw new Error("bug create response mismatch");
+
+  const bugsAfterCreate = await request("/api/bugs");
+  if (!bugsAfterCreate.some((item) => item.id === bug.id)) {
+    throw new Error("created bug was not listed");
+  }
+
+  const patchedBug = await request(`/api/bugs/${bug.id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ text: "smoke test bug patched", severity: "high" }),
+  });
+  if (patchedBug.text !== "smoke test bug patched" || patchedBug.severity !== "high") {
+    throw new Error("bug patch response mismatch");
+  }
 
   const resolved = await request(`/api/bugs/${bug.id}/resolve`, {
     method: "POST",
@@ -49,6 +75,28 @@ try {
   });
   if (resolved.profile.xp <= dashboard.profile.xp) {
     throw new Error("XP did not increase after resolving bug");
+  }
+
+  const profileAfterResolve = await request("/api/profile");
+  if (profileAfterResolve.xp !== resolved.profile.xp) {
+    throw new Error("profile XP did not persist after resolving bug");
+  }
+
+  const xp = await request("/api/xp");
+  if (!xp.events.some((event) => event.sourceId === bug.id && event.delta === 120)) {
+    throw new Error("XP event for resolved bug missing");
+  }
+
+  const goal = await request("/api/goals", {
+    method: "POST",
+    body: JSON.stringify({ ownerType: "self", label: "smoke test goal", progress: 10 }),
+  });
+  const patchedGoal = await request(`/api/goals/${goal.id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ progress: 35 }),
+  });
+  if (patchedGoal.progress !== 35) {
+    throw new Error("goal patch response mismatch");
   }
 
   const advice = await request("/api/ai/advice", {
@@ -59,6 +107,31 @@ try {
 
   const vault = await request("/api/vault/unlock", { method: "POST", body: JSON.stringify({}) });
   if (vault.mode !== "demo") throw new Error("vault mode mismatch");
+
+  const vaultItems = await request("/api/vault/items");
+  const updatedVaultItem = await request(`/api/vault/items/${vaultItems[0].id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ progress: 95 }),
+  });
+  if (updatedVaultItem.progress !== 95) {
+    throw new Error("vault item patch response mismatch");
+  }
+
+  const sync = await request("/api/coop/sync", { method: "POST" });
+  if (sync.mode !== "local-demo" || sync.goals.self[0].progress !== 72) {
+    throw new Error("coop sync response mismatch");
+  }
+
+  const dashboardAfterWrites = await request("/api/dashboard");
+  if (dashboardAfterWrites.profile.xp !== resolved.profile.xp) {
+    throw new Error("dashboard did not reflect persisted XP");
+  }
+  if (!dashboardAfterWrites.goals.self.some((item) => item.id === goal.id && item.progress === 35)) {
+    throw new Error("dashboard did not reflect persisted goal");
+  }
+  if (!dashboardAfterWrites.vaultItems.some((item) => item.id === updatedVaultItem.id && item.progress === 95)) {
+    throw new Error("dashboard did not reflect persisted vault item");
+  }
 
   console.log("smoke ok");
 } finally {

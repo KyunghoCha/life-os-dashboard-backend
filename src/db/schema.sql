@@ -1,6 +1,12 @@
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  version INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  applied_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS profiles (
   id TEXT PRIMARY KEY,
   display_name TEXT NOT NULL,
@@ -65,3 +71,6 @@ CREATE TABLE IF NOT EXISTS coop_profiles (
   anniversary TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+INSERT OR IGNORE INTO schema_migrations (version, name, applied_at)
+VALUES (1, 'initial local schema', datetime('now'));

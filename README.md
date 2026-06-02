@@ -9,6 +9,7 @@
 - [API 계약 초안](docs/03-api-contract.md)
 - [구현 계획](docs/04-implementation-plan.md)
 - [실사용 최종 로드맵](docs/05-final-roadmap.md)
+- [운영 명령과 데이터 관리](docs/06-operations.md)
 
 ## 현재 기준
 
@@ -18,6 +19,27 @@
 - 백엔드 현재 상태: Express API와 SQLite 저장소가 있으며 `npm run smoke`로 기본 API 흐름을 확인한다.
 - 프론트 현재 상태: `GET /api/dashboard`, 버그 추가/해결, AI 조언, Vault demo unlock/진행률 수정, Co-op sync API를 호출한다.
 - 다음 목표: 브라우저에서 실제 클릭 흐름과 새로고침 후 데이터 유지까지 확인하고, 루트 실행 방식을 정리한다.
+
+## 실행
+
+```bash
+npm install
+npm run dev
+```
+
+기본 서버 주소는 `http://127.0.0.1:4000`이다. 환경 변수 예시는 `.env.example`에 있다.
+
+## 데이터 관리
+
+```bash
+npm run backup
+npm run reset -- --force
+npm run smoke
+```
+
+- `npm run backup`은 현재 SQLite DB를 `backups/` 아래에 복사한다.
+- `npm run reset -- --force`는 `DB_PATH`의 SQLite 파일과 WAL/SHM 파일을 삭제한다.
+- `npm run smoke`는 API 주요 흐름과 CORS 응답을 임시 DB로 검증한다.
 
 ## 구현 전 원칙
 

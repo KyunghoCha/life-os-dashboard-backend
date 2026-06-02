@@ -11,6 +11,7 @@
 - [실사용 최종 로드맵](docs/05-final-roadmap.md)
 - [운영 명령과 데이터 관리](docs/06-operations.md)
 - [프론트 연동 안내](docs/07-frontend-integration.md)
+- [백엔드 구현 요약](docs/08-backend-implementation-summary.md)
 
 ## 현재 기준
 
@@ -30,6 +31,12 @@ npm run dev
 
 기본 서버 주소는 `http://127.0.0.1:4000`이다. Node 기준은 `.nvmrc`와 `package.json`의 `engines`에 맞춘 Node 24다. 환경 변수 예시는 `.env.example`에 있다.
 
+백엔드와 sibling 프론트(`../frontend`)를 함께 켜려면 다음 명령을 사용한다.
+
+```bash
+npm run dev:local
+```
+
 서버가 이미 실행 중이면 다음 명령으로 연결 상태를 확인할 수 있다.
 
 ```bash
@@ -41,6 +48,7 @@ npm run health
 ```bash
 npm run backup
 npm run health
+npm run migrate
 npm run restore -- <backup-file> --force
 npm run reset -- --force
 npm run smoke
@@ -48,6 +56,7 @@ npm run smoke
 
 - `npm run backup`은 현재 SQLite DB를 `backups/` 아래에 복사한다.
 - `npm run health`는 실행 중인 백엔드의 `/api/health` 응답을 확인한다.
+- `npm run migrate`는 schema migration을 적용하고 현재 버전을 출력한다.
 - `npm run restore -- <backup-file> --force`는 백업 파일을 `DB_PATH` 위치로 복원한다.
 - `npm run reset -- --force`는 `DB_PATH`의 SQLite 파일과 WAL/SHM 파일을 삭제한다.
 - `npm run smoke`는 API 주요 흐름과 CORS 응답을 임시 DB로 검증한다.
@@ -58,6 +67,7 @@ GitHub Actions는 `ubuntu-latest`, `windows-latest`, `macos-latest`에서 다음
 
 ```bash
 npm ci
+npm run migrate
 npm run smoke
 npm audit --audit-level=moderate
 ```

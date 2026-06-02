@@ -1,0 +1,17 @@
+{
+  "name": "life-os-dashboard-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local API backend for the Life OS Dashboard prototype.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

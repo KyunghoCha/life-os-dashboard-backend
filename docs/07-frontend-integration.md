@@ -22,6 +22,14 @@ npm install
 npm run dev
 ```
 
+백엔드 폴더에서 두 서버를 함께 켜려면 다음 명령도 사용할 수 있다.
+
+```bash
+npm run dev:local
+```
+
+프론트 폴더가 sibling `../frontend`가 아니면 백엔드 실행 전에 `FRONTEND_DIR`를 지정한다.
+
 기본 주소:
 
 - Backend API: `http://127.0.0.1:4000`

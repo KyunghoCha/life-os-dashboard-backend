@@ -14,7 +14,8 @@
     "migrate": "node scripts/migrate.js",
     "restore": "node scripts/restore.js",
     "reset": "node scripts/reset.js",
-    "smoke": "node scripts/smoke.js"
+    "smoke": "node scripts/smoke.js",
+    "smoke:local": "node scripts/start-local.js --smoke"
   },
   "engines": {
     "node": ">=24 <25"

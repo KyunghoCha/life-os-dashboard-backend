@@ -1,5 +1,6 @@
-import { copyFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, copyFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
+import Database from "better-sqlite3";
 
 const force = process.argv.includes("--force");
 const backupArg = process.argv.slice(2).find((arg) => !arg.startsWith("--"));
@@ -28,7 +29,12 @@ if (existsSync(dbPath)) {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const rollbackPath = resolve(rollbackDir, `${basename(dbPath, ".sqlite")}-${stamp}.sqlite`);
   mkdirSync(dirname(rollbackPath), { recursive: true });
-  copyFileSync(dbPath, rollbackPath);
+  const currentDb = new Database(dbPath, { readonly: true, fileMustExist: true });
+  try {
+    await currentDb.backup(rollbackPath);
+  } finally {
+    currentDb.close();
+  }
   console.log(`current database copied before restore: ${rollbackPath}`);
 }
 

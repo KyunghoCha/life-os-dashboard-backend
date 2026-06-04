@@ -44,10 +44,10 @@ export function validateProgress(value) {
   return value;
 }
 
-export function validateXpDelta(value, fallback = 120) {
+export function validateXpDelta(value, fallback = 120, fieldName = "xpDelta") {
   const delta = value ?? fallback;
   if (!Number.isInteger(delta) || delta < 0 || delta > 5000) {
-    throw httpError(400, "VALIDATION_ERROR", "xpDelta must be an integer from 0 to 5000");
+    throw httpError(400, "VALIDATION_ERROR", `${fieldName} must be an integer from 0 to 5000`);
   }
   return delta;
 }

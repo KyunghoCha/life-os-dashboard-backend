@@ -1,6 +1,6 @@
 # Life OS Dashboard Backend
 
-이 디렉터리는 `Life OS Dashboard`의 백엔드 작업 공간이다. 현재는 문서와 1차 로컬 API 구현이 함께 존재한다. 프론트엔드는 `../frontend`에 있으며, 현재 화면은 `src/api/client.js`를 통해 백엔드 API를 호출하는 구조로 전환되었다.
+이 디렉터리는 `Life OS Dashboard`의 백엔드 작업 공간이다. 현재는 문서와 1차 로컬 API 구현이 함께 존재한다. 로컬 참고 프론트엔드는 기본적으로 `../frontend`에 두고 실행한다. 팀 프론트 저장소 반영 여부는 프론트 담당자와 별도로 확인해야 한다.
 
 ## 문서
 
@@ -19,8 +19,8 @@
 - 프론트 제목: `Life OS Dashboard`
 - 실행 형태: 브라우저에서 동작하는 React/Vite 웹앱
 - 백엔드 현재 상태: Express API와 `better-sqlite3` 기반 SQLite 저장소가 있으며 `npm run smoke`로 기본 API 흐름을 확인한다.
-- 프론트 현재 상태: `GET /api/dashboard`, 버그 추가/해결, AI 조언, Vault demo unlock/진행률 수정, Co-op sync API를 호출한다.
-- 다음 목표: 실행 스크립트와 API 계약을 팀 공유용으로 더 단단하게 정리하고, 실제 AI/Vault 보안 범위를 결정한다.
+- 프론트 연동 기준: `GET /api/dashboard`, 버그 추가/해결, AI 조언, Vault demo unlock/진행률 수정, Co-op sync API를 호출하면 된다.
+- 다음 목표: 팀 프론트에서 API 계약을 실제로 붙여 보고, 실제 AI/Vault 보안 범위를 결정한다.
 
 ## 실행
 
@@ -37,6 +37,8 @@ npm run dev
 npm run dev:local
 ```
 
+프론트 폴더 위치나 포트를 바꿔야 하면 실행 전에 `FRONTEND_DIR`, `FRONTEND_HOST`, `FRONTEND_PORT`를 지정한다.
+
 서버가 이미 실행 중이면 다음 명령으로 연결 상태를 확인할 수 있다.
 
 ```bash
@@ -52,6 +54,7 @@ npm run migrate
 npm run restore -- <backup-file> --force
 npm run reset -- --force
 npm run smoke
+npm run smoke:local
 ```
 
 - `npm run backup`은 현재 SQLite DB를 `backups/` 아래에 복사한다.
@@ -60,6 +63,7 @@ npm run smoke
 - `npm run restore -- <backup-file> --force`는 백업 파일을 `DB_PATH` 위치로 복원한다.
 - `npm run reset -- --force`는 `DB_PATH`의 SQLite 파일과 WAL/SHM 파일을 삭제한다.
 - `npm run smoke`는 API 주요 흐름과 CORS 응답을 임시 DB로 검증한다.
+- `npm run smoke:local`은 `dev:local` 실행 래퍼가 백엔드를 띄우고 health 응답을 받을 수 있는지 확인한다.
 
 ## CI
 
@@ -69,6 +73,7 @@ GitHub Actions는 `ubuntu-latest`, `windows-latest`, `macos-latest`에서 다음
 npm ci
 npm run migrate
 npm run smoke
+npm run smoke:local
 npm audit --audit-level=moderate
 ```
 

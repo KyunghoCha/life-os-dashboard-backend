@@ -22,7 +22,7 @@ export function readXp() {
 }
 
 export function createManualXpEvent(payload) {
-  const delta = validateXpDelta(payload.delta, 0);
+  const delta = validateXpDelta(payload.delta, 0, "delta");
   return transaction(() => {
     const profile = addXp(delta);
     const event = createXpEvent({

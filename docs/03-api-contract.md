@@ -118,10 +118,11 @@
 {
   "delta": 120,
   "reason": "manual adjustment",
-  "sourceType": "manual",
   "sourceId": null
 }
 ```
+
+`sourceType`은 서버가 항상 `manual`로 기록한다.
 
 ## Bugs
 
